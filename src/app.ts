@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import cors from 'cors';
 
 // Local Imports (NOTE: .mts extension is required in ESM)
 import routes from './routes/index.mts';
@@ -25,6 +26,8 @@ app.use(express.json({ limit: '10kb' })); // To parse the incoming requests with
 // (Protects against XSS, sniffer attacks, etc.)
 app.use(helmet());
 
+// Enable CORS
+app.use(cors());
 
 // Development logging
 if (process.env.NODE_ENV === 'development') {
