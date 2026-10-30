@@ -17,6 +17,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^5.0.5",
+    "@types/json-schema": "^7.0.15",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^22.13.9",
     "dotenv": "^17.2.3",
@@ -28,11 +30,14 @@
   "dependencies": {
     "@types/cors": "^2.8.19",
     "@types/swagger-ui-express": "^4.1.8",
+    "ajv-formats": "^3.0.1",
+    "ajv-keywords": "^5.1.0",
     "argon2": "^0.45.1",
     "cors": "^2.8.6",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.0.0",
     "morgan": "^1.10.1",
     "swagger-ui-express": "^5.0.1"
