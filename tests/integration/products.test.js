@@ -43,9 +43,18 @@ vi.mock("../../src/database/index.mts", () => {
       initDb: (cb) => cb && cb(null),
       getDb: () => ({
         collection: (name) => ({
-          find: (query) => ({
-            toArray: async () => collections[name] || []
-          }),
+          countDocuments: async (query) => (collections[name] || []).length,
+          // a tiny cursor: skip/limit/project return the cursor so they can be chained like the real thing
+          find: (query) => {
+            let docs = collections[name] || [];
+            const cursor = {
+              skip: (n) => { docs = docs.slice(n); return cursor; },
+              limit: (n) => { docs = docs.slice(0, n); return cursor; },
+              project: () => cursor,
+              toArray: async () => docs
+            };
+            return cursor;
+          },
           deleteMany: async (q) => {
             collections[name] = [];
             return { deletedCount: 0 };
@@ -60,6 +69,8 @@ vi.mock("../../src/database/index.mts", () => {
 });
 
 describe("getAllProducts", () => {
+  // the same shape product.service builds from the query string (no filter, first page of 20)
+  const defaultFind = { search: {}, limit: 20, offset: 0 };
   let mongodb;
   let productsModel;
 
@@ -84,9 +95,10 @@ describe("getAllProducts", () => {
   });
 
   it("should return an array of products", async () => {
-    const data = await productsModel.getAllProducts();
+    const data = await productsModel.getAllProducts(defaultFind);
 
-    expect(data).toEqual([
+    expect(data.totalCount).toBe(1);
+    expect(data.results).toEqual([
       {
         id: "880RR",
         nameWithoutBrand: "Ajax Tent - 3-Person, 3-Season",
@@ -123,7 +135,7 @@ describe("getAllProducts", () => {
       .collection("products");
     await collection.deleteMany({});
 
-    const data = await productsModel.getAllProducts();
-    expect(data).toEqual([]);
+    const data = await productsModel.getAllProducts(defaultFind);
+    expect(data).toEqual({ results: [], totalCount: 0 });
   });
 });

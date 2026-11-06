@@ -273,6 +273,11 @@ export const UserSchema: JSONSchema7 = {
         }
       }
     },
+    tokenVersion: {
+      type: "integer",
+      minimum: 0,
+      description: "Incremented to invalidate all of the user's existing login tokens"
+    },
     createdAt: { instanceof: "Date" },
     modifiedAt: { instanceof: "Date" }
   },
@@ -465,4 +470,22 @@ export const AlertSchema = {
     modifiedAt: { instanceof: "Date" }
   },
   required: ["title", "type", "status", "createdAt", "modifiedAt"]
+};
+// Change password request body. Validated against the plain-text values the user sent,
+// before anything is hashed, so the length rules actually apply to what the user typed.
+export const ChangePasswordSchema: JSONSchema7 = {
+  $schema: "http://json-schema.org/draft-07/schema#",
+  title: "ChangePasswordRequest",
+  type: "object",
+  properties: {
+    currentPassword: { type: "string", minLength: 1 },
+    newPassword: {
+      type: "string",
+      minLength: 6,
+      maxLength: 100,
+      description:
+        "The new password, must be at least six characters long and no more than one hundred characters long"
+    }
+  },
+  required: ["currentPassword", "newPassword"]
 };

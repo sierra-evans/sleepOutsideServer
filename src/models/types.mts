@@ -68,8 +68,17 @@ export interface User {
   address?: Address;
   phoneNumbers?: PhoneNumber[];
   cart?: CartItem[];
+  // incremented whenever existing login tokens should stop working (e.g. password change)
+  tokenVersion?: number;
   createdAt: Date;
   modifiedAt: Date;
+}
+
+// The user fields that are safe to send to the browser. Never include the password hash.
+export interface PublicUser {
+  _id: string;
+  email: string;
+  name: string;
 }
 
 export interface Address {
