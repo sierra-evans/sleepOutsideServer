@@ -33,7 +33,13 @@ const getProductById = async (id: string) => {
   return await productModel.getProductById(id);
 };
 
+// PRODUCT SEARCH ENDPOINT
+const searchProducts = async (q: string) => {
+  return await productModel.searchProducts(q);
+};
+
 export default {
   getAllProducts,
-  getProductById
+  getProductById,
+  searchProducts
 };
