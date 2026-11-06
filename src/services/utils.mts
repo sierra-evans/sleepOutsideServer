@@ -89,13 +89,26 @@ export function sanitize(v:Record<string, any>) {
     return v;
 };
 
+// One place to read the JWT secret so signing (generateToken) and verifying (authorize) can never disagree.
+export function getJwtSecret() {
+  return process.env.JWT_SECRET || "secret";
+}
+
+// What we put inside the token. tv (token version) lets us revoke every token for a user
+// at once: bump user.tokenVersion in the database and all older tokens stop matching.
+export interface TokenPayload {
+  email: string;
+  id: string;
+  tv?: number;
+}
+
 export async function generateToken(user:User) {
-  const secret = process.env.JWT_SECRET || "secret";
+  const secret = getJwtSecret();
   // the "as any" is a bit of a hack here. without it the sign function below will complain about the expires variable.
   // .sign expects expiresIn to be Number | StringValue. We don't know what a StringValue is though...if you dig deeper you will find that StringValue comes from another type package: @types/ms. You could add that to your project and then import it and change the "as any" to "as StringValue" But it doesn't seem like we should have to...thus "as any"
   const expires =  process.env.JWT_EXPIRES_IN || '10m' as any; // 600 seconds = 10 minutes;
 
-  const jwtUser={email: user.email, id: user._id}
+  const jwtUser = { email: user.email, id: user._id, tv: user.tokenVersion ?? 0 }
   const token = jsonwebtoken.sign(jwtUser, secret, {expiresIn: expires})
   
   return token;

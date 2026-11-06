@@ -16,7 +16,6 @@ router.post('/login', async (req, res, next) => {
         // call the service function, pass in the email and password.
         // the service function should return a valid user and token  or null for either
         const results = await userService.login(email, password);
-        console.log(results)
         // forward a 401 error if either is null
         if (!results.token || !results.user) {
             return next(new EntityNotFoundError({
@@ -44,6 +43,25 @@ router.post("/", async (req, res, next) => {
     }
 
 })
+
+// Change the logged in user's password.
+// Body: { currentPassword, newPassword }
+// Response: { message, token } - the old token stops working, the client must switch to the new one.
+// The user is identified by the token (res.locals.user.id), never by the body or URL,
+// so a user can only change their own password.
+router.patch('/password', authorize, async (req, res, next) => {
+    try {
+        const cleanBody = sanitize(req.body || {});
+        const { currentPassword, newPassword } = cleanBody;
+
+        // Changing the password revokes every existing token for this user, including the one
+        // used for this request, so send back a new token for the client to use from now on.
+        const { token } = await userService.changePassword(res.locals.user.id, currentPassword, newPassword);
+        res.status(200).json({ message: "Password updated successfully", token });
+    } catch (err) {
+        next(err)
+    }
+});
 
 router.get('/protected', authorize, (req, res) => {
     console.log(res.locals.user)
