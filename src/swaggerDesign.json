@@ -1017,6 +1017,62 @@
     }
   },
   "paths": {
+    "/products/recommended": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Get recommended products for a product",
+        "description": "Returns 3 products to show alongside the given product: a random product from the same category, a random product from a different category, and the product closest in price (any category). The given product is never included and no product appears twice. Fewer than 3 are returned only if the catalog doesn't have enough other products.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "description": "The id of the product being viewed, e.g. 880RR",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recommended products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
+                    }
+                  },
+                  "required": [
+                    "count",
+                    "results"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/products/{id}": {
       "get": {
         "tags": [

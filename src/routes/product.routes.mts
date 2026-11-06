@@ -46,6 +46,31 @@ router.get("/search", async (req, res, next) => {
   }
 });
 
+// RECOMMENDED PRODUCTS ENDPOINT
+// GET /products/recommended?id=880RR
+// Returns { count, results } with 3 products related to the given product (never the product itself, no duplicates).
+// NOTE: this must stay above the /:id route, otherwise Express would treat "recommended" as a product id.
+router.get("/recommended", async (req, res, next) => {
+  try {
+    const { id } = sanitize(req.query);
+    // typeof check also rejects ?id=a&id=b, which Express turns into an array
+    if (!id || typeof id !== "string") {
+      return next(new EntityNotFoundError({
+        message: "Query id is required", code: "ERR_VALID", statusCode: 400,
+      }));
+    }
+    const results = await productService.getRecommendedProducts(id);
+    if (!results) {
+      return next(new EntityNotFoundError({
+        message: `Product ${id} Not Found`, code: "ERR_NF", statusCode: 404,
+      }));
+    }
+    res.status(200).json({ count: results.length, results });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /products/:id
 router.get("/:id", async (req, res, next) => {
 

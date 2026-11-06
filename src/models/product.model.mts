@@ -1,6 +1,6 @@
 import mongodb from "../database/index.mts";
 import type { Product, FindProductObj } from "./types.mts";
-import type { Collection } from "mongodb";
+import type { Collection, Filter } from "mongodb";
 
 export async function getAllProducts(find: FindProductObj) {
   // get a reference to our Products collection
@@ -45,8 +45,41 @@ async function searchProducts(q: string) {
   return { count: results.length, results };
 }
 
+// RECOMMENDED PRODUCTS HELPERS
+
+// Returns up to `count` random products matching the filter.
+// $sample picks randomly so shoppers see some variety each time they view a product.
+async function getRandomProducts(filter: Filter<Product>, count: number): Promise<Product[]> {
+  if (count <= 0) return [];
+  return mongodb.getDb().collection<Product>("products")
+    .aggregate<Product>([
+      { $match: filter },
+      { $sample: { size: count } }
+    ])
+    .toArray();
+}
+
+// Returns up to `count` products matching the filter whose finalPrice is closest to `price`.
+async function getProductsClosestInPrice(filter: Filter<Product>, price: number, count: number): Promise<Product[]> {
+  if (count <= 0) return [];
+  return mongodb.getDb().collection<Product>("products")
+    .aggregate<Product>([
+      { $match: filter },
+      // work out how far each product's price is from the target, in either direction
+      { $addFields: { priceDifference: { $abs: { $subtract: ["$finalPrice", price] } } } },
+      // closest first. Sorting by id as well keeps ties in a stable order.
+      { $sort: { priceDifference: 1, id: 1 } },
+      { $limit: count },
+      // the helper field was only for sorting, don't send it to the client
+      { $project: { priceDifference: 0 } }
+    ])
+    .toArray();
+}
+
 export default {
   getAllProducts,
   getProductById,
-  searchProducts
+  searchProducts,
+  getRandomProducts,
+  getProductsClosestInPrice
 };
