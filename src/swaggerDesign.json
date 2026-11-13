@@ -520,6 +520,13 @@
             },
             "productSize": {
               "type": "string"
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99,
+              "default": 1,
+              "description": "How many of this product. Treated as 1 when missing."
             }
           },
           "required": [

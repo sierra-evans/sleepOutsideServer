@@ -269,7 +269,8 @@ export const UserSchema: JSONSchema7 = {
               colorCode: { type: "string" }
             }
           },
-          productSize: { type: "string" }
+          productSize: { type: "string" },
+          quantity: { type: "integer", minimum: 1, maximum: 99 }
         }
       }
     },
@@ -413,7 +414,8 @@ export const OrderSchema = {
               colorCode: { type: "string" }
             }
           },
-          productSize: { type: "string" }
+          productSize: { type: "string" },
+          quantity: { type: "integer", minimum: 1, maximum: 99 }
         }
       }
     },

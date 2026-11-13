@@ -155,6 +155,8 @@ export interface CartItem {
   productCategory: string;
   productColor: Color;
   productSize: string;
+  // how many of this product; treated as 1 when missing
+  quantity?: number;
 }
 
 // Order schema
